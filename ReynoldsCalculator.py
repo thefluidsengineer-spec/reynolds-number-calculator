@@ -1,5 +1,3 @@
-# app.py
-
 import streamlit as st
 import numpy as np
 import matplotlib.pyplot as plt
@@ -36,7 +34,6 @@ format="%.6f"
 
 if flow_type == "Pipe Flow":
 
-```
 diameter = st.sidebar.number_input(
     "Pipe Diameter (m)",
     min_value=0.001,
@@ -44,11 +41,9 @@ diameter = st.sidebar.number_input(
 )
 
 Re = density * velocity * diameter / viscosity
-```
 
 else:
 
-```
 x_location = st.sidebar.number_input(
     "Distance from Leading Edge (m)",
     min_value=0.001,
@@ -56,7 +51,6 @@ x_location = st.sidebar.number_input(
 )
 
 Re = density * velocity * x_location / viscosity
-```
 
 st.header("Results")
 
@@ -76,11 +70,9 @@ else:
 regime = "Turbulent"
 color = "red"
 
-```
 st.markdown(
     f"### Flow Regime: :{color}[{regime}]"
 )
-```
 
 st.subheader("Flow Regime Gauge")
 
@@ -96,7 +88,6 @@ st.caption(
 
 if flow_type == "Pipe Flow":
 
-```
 st.subheader("Velocity Profile")
 
 y = np.linspace(-1, 1, 200)
@@ -152,11 +143,9 @@ ax2.set_title("Qualitative Flow Pattern")
 ax2.axis("off")
 
 st.pyplot(fig2)
-```
 
 else:
 
-```
 st.subheader("Boundary Layer Development")
 
 x = np.linspace(0.01,5,500)
@@ -214,4 +203,3 @@ ax2.set_title(
 ax2.axis("off")
 
 st.pyplot(fig2)
-```
