@@ -10,30 +10,78 @@ st.set_page_config(page_title="Fluid Flow Visualizer", layout="wide")
 # =========================
 def draw_gauge(value, max_value, flow_type):
 
+    # Standardized colors
+    LAMINAR_COLOR = "#2ca02c"      # green
+    TRANSITION_COLOR = "#ff7f0e"   # orange
+    TURBULENT_COLOR = "#d62728"    # red
+
     fig, ax = plt.subplots(figsize=(4, 2.5))
 
-    # Colored regions
+    # =====================
+    # PIPE FLOW GAUGE
+    # =====================
     if flow_type == "Pipe Flow":
 
-        # Laminar
         ax.add_patch(
-            Wedge((0, 0), 1, 180, 128, color="green", alpha=0.6)
+            Wedge(
+                (0, 0),
+                1,
+                180,
+                128,
+                color=LAMINAR_COLOR,
+                alpha=0.8
+            )
         )
 
-        # Transitional
         ax.add_patch(
-            Wedge((0, 0), 1, 128, 90, color="orange", alpha=0.6)
+            Wedge(
+                (0, 0),
+                1,
+                128,
+                90,
+                color=TRANSITION_COLOR,
+                alpha=0.8
+            )
         )
 
-        # Turbulent
         ax.add_patch(
-            Wedge((0, 0), 1, 90, 0, color="red", alpha=0.6)
+            Wedge(
+                (0, 0),
+                1,
+                90,
+                0,
+                color=TURBULENT_COLOR,
+                alpha=0.8
+            )
         )
 
-        ax.text(-0.85, 0.1, "Laminar", fontsize=8)
-        ax.text(-0.15, 1.05, "Transition", fontsize=8)
-        ax.text(0.60, 0.1, "Turbulent", fontsize=8)
+        ax.text(
+            -0.85,
+            0.10,
+            "Laminar",
+            fontsize=8,
+            fontweight="bold"
+        )
 
+        ax.text(
+            -0.15,
+            1.05,
+            "Transition",
+            fontsize=8,
+            fontweight="bold"
+        )
+
+        ax.text(
+            0.60,
+            0.10,
+            "Turbulent",
+            fontsize=8,
+            fontweight="bold"
+        )
+
+    # =====================
+    # FLAT PLATE GAUGE
+    # =====================
     else:
 
         laminar_fraction = 5e5 / max_value
@@ -45,8 +93,8 @@ def draw_gauge(value, max_value, flow_type):
                 1,
                 180,
                 180 - laminar_angle,
-                color="green",
-                alpha=0.6
+                color=LAMINAR_COLOR,
+                alpha=0.8
             )
         )
 
@@ -56,41 +104,74 @@ def draw_gauge(value, max_value, flow_type):
                 1,
                 180 - laminar_angle,
                 0,
-                color="red",
-                alpha=0.6
+                color=TURBULENT_COLOR,
+                alpha=0.8
             )
         )
 
-        ax.text(-0.85, 0.1, "Laminar", fontsize=8)
-        ax.text(0.60, 0.1, "Turbulent", fontsize=8)
+        ax.text(
+            -0.85,
+            0.10,
+            "Laminar",
+            fontsize=8,
+            fontweight="bold"
+        )
 
-    # Needle
+        ax.text(
+            0.60,
+            0.10,
+            "Turbulent",
+            fontsize=8,
+            fontweight="bold"
+        )
+
+    # =====================
+    # NEEDLE
+    # =====================
     fraction = min(value, max_value) / max_value
+
     angle = np.pi * (1 - fraction)
 
     ax.plot(
         [0, 0.85 * np.cos(angle)],
         [0, 0.85 * np.sin(angle)],
-        linewidth=4
+        linewidth=4,
+        color="black"
     )
 
-    ax.plot(0, 0, marker='o', markersize=8)
+    ax.plot(
+        0,
+        0,
+        marker="o",
+        markersize=8,
+        color="black"
+    )
 
+    # =====================
+    # REYNOLDS NUMBER BOX
+    # =====================
     ax.text(
         0,
         -0.25,
         f"Re = {value:,.0f}",
-        ha='center',
+        ha="center",
+        va="center",
         fontsize=11,
-        fontweight='bold'
+        fontweight="bold",
+        color="white",
+        bbox=dict(
+            facecolor="black",
+            edgecolor="black",
+            boxstyle="round,pad=0.4"
+        )
     )
 
     ax.set_xlim(-1.2, 1.2)
-    ax.set_ylim(-0.4, 1.2)
+    ax.set_ylim(-0.45, 1.2)
+
     ax.axis("off")
 
     return fig
-
 
 # =========================
 # Title
