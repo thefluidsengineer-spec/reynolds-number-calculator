@@ -22,7 +22,7 @@ def draw_gauge(value, max_value, flow_type):
     ax.add_patch(
         Wedge(
             (0, 0),
-            1.15,
+            1.0,
             180,
             360,
             color="black"
@@ -119,19 +119,21 @@ def draw_gauge(value, max_value, flow_type):
         )
 
         ax.text(
-            -0.85,
-            0.18,
+            -0.72,
+            0.22,
             "Laminar",
             fontsize=8,
             fontweight="bold"
+            ha="center"
         )
 
         ax.text(
-            0.55,
-            0.18,
+            0.70,
+            0.22,
             "Turbulent",
             fontsize=8,
             fontweight="bold"
+            ha="center"
         )
 
     # =============================
@@ -161,7 +163,7 @@ def draw_gauge(value, max_value, flow_type):
     # =============================
     ax.text(
         0,
-        -0.45,
+        -0.38,
         f"Re = {value:,.0f}",
         color="white",
         fontsize=12,
@@ -173,7 +175,17 @@ def draw_gauge(value, max_value, flow_type):
     ax.set_ylim(-0.6, 1.2)
 
     ax.axis("off")
-
+    ax.add_patch(
+        Wedge(
+            (0,0),
+            1.0,
+            0,
+            360,
+            fill=False,
+            edgecolor="white",
+            linewidth=2
+        )
+    )
     return fig
 
 
