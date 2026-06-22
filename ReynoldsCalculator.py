@@ -1,37 +1,134 @@
 import streamlit as st
 import numpy as np
 import matplotlib.pyplot as plt
+from matplotlib.patches import Wedge
 
 st.set_page_config(page_title="Fluid Flow Visualizer", layout="wide")
 
+# =========================
+# Gauge Function
+# =========================
+def draw_gauge(value, max_value, flow_type):
+
+    fig, ax = plt.subplots(figsize=(4, 2.5))
+
+    # Colored regions
+    if flow_type == "Pipe Flow":
+
+        # Laminar
+        ax.add_patch(
+            Wedge((0, 0), 1, 180, 128, color="green", alpha=0.6)
+        )
+
+        # Transitional
+        ax.add_patch(
+            Wedge((0, 0), 1, 128, 90, color="orange", alpha=0.6)
+        )
+
+        # Turbulent
+        ax.add_patch(
+            Wedge((0, 0), 1, 90, 0, color="red", alpha=0.6)
+        )
+
+        ax.text(-0.85, 0.1, "Laminar", fontsize=8)
+        ax.text(-0.15, 1.05, "Transition", fontsize=8)
+        ax.text(0.60, 0.1, "Turbulent", fontsize=8)
+
+    else:
+
+        laminar_fraction = 5e5 / max_value
+        laminar_angle = 180 * laminar_fraction
+
+        ax.add_patch(
+            Wedge(
+                (0, 0),
+                1,
+                180,
+                180 - laminar_angle,
+                color="green",
+                alpha=0.6
+            )
+        )
+
+        ax.add_patch(
+            Wedge(
+                (0, 0),
+                1,
+                180 - laminar_angle,
+                0,
+                color="red",
+                alpha=0.6
+            )
+        )
+
+        ax.text(-0.85, 0.1, "Laminar", fontsize=8)
+        ax.text(0.60, 0.1, "Turbulent", fontsize=8)
+
+    # Needle
+    fraction = min(value, max_value) / max_value
+    angle = np.pi * (1 - fraction)
+
+    ax.plot(
+        [0, 0.85 * np.cos(angle)],
+        [0, 0.85 * np.sin(angle)],
+        linewidth=4
+    )
+
+    ax.plot(0, 0, marker='o', markersize=8)
+
+    ax.text(
+        0,
+        -0.25,
+        f"Re = {value:,.0f}",
+        ha='center',
+        fontsize=11,
+        fontweight='bold'
+    )
+
+    ax.set_xlim(-1.2, 1.2)
+    ax.set_ylim(-0.4, 1.2)
+    ax.axis("off")
+
+    return fig
+
+
+# =========================
+# Title
+# =========================
 st.title("The Fluids Engineer - Flow Visualizer")
 
 flow_type = st.selectbox(
-"Flow Geometry",
-["Pipe Flow", "Flat Plate"]
+    "Flow Geometry",
+    ["Pipe Flow", "Flat Plate"]
 )
 
+# =========================
+# Sidebar Inputs
+# =========================
 st.sidebar.header("Fluid Properties")
 
 velocity = st.sidebar.number_input(
-"Velocity (m/s)",
-min_value=0.01,
-value=1.0
+    "Velocity (m/s)",
+    min_value=0.01,
+    value=1.0
 )
 
 density = st.sidebar.number_input(
-"Density (kg/m³)",
-min_value=0.01,
-value=1000.0
+    "Density (kg/m³)",
+    min_value=0.01,
+    value=1000.0
 )
 
 viscosity = st.sidebar.number_input(
-"Dynamic Viscosity (Pa·s)",
-min_value=0.000001,
-value=0.001,
-format="%.6f"
+    "Dynamic Viscosity (Pa·s)",
+    min_value=0.000001,
+    value=0.001,
+    format="%.6f"
 )
 
+# =========================
+# Reynolds Number
+# =========================
 if flow_type == "Pipe Flow":
 
     diameter = st.sidebar.number_input(
@@ -41,6 +138,16 @@ if flow_type == "Pipe Flow":
     )
 
     Re = density * velocity * diameter / viscosity
+
+    if Re < 2300:
+        regime = "Laminar"
+        color = "green"
+    elif Re < 4000:
+        regime = "Transitional"
+        color = "orange"
+    else:
+        regime = "Turbulent"
+        color = "red"
 
 else:
 
@@ -52,144 +159,244 @@ else:
 
     Re = density * velocity * x_location / viscosity
 
-st.header("Results")
-
-col1, col2 = st.columns(2)
-
-with col1:
-    st.metric("Reynolds Number", f"{Re:,.0f}")
-
-with col2:
-    if Re < 2300:
+    if Re < 5e5:
         regime = "Laminar"
         color = "green"
-    elif Re < 4000:
-        regime = "Transitional"
-        color = "orange"
     else:
         regime = "Turbulent"
         color = "red"
+
+# =========================
+# Results Layout
+# =========================
+st.header("Results")
+
+left_col, right_col = st.columns([1, 1])
+
+# =========================
+# Left Side
+# =========================
+with left_col:
+
+    st.metric(
+        "Reynolds Number",
+        f"{Re:,.0f}"
+    )
 
     st.markdown(
         f"### Flow Regime: :{color}[{regime}]"
     )
 
-st.subheader("Flow Regime Gauge")
+    if flow_type == "Pipe Flow":
 
-gauge_max = 10000
+        st.subheader("Flow Regime Gauge")
 
-normalized = min(Re, gauge_max)
+        fig_gauge = draw_gauge(
+            Re,
+            8000,
+            "Pipe Flow"
+        )
 
-st.progress(normalized / gauge_max)
-
-st.caption(
-"Laminar < 2300 | Transitional 2300-4000 | Turbulent > 4000"
-)
-
-if flow_type == "Pipe Flow":
-
-    st.subheader("Velocity Profile")
-
-    y = np.linspace(-1, 1, 200)
-
-    if Re < 2300:
-        u = 1 - y**2
-    elif Re < 4000:
-        u = (1 - y**2)**0.5
     else:
-        u = (1 - np.abs(y))**0.15
 
-    fig, ax = plt.subplots()
+        st.subheader("Boundary Layer Regime Gauge")
 
-    ax.plot(u, y)
+        fig_gauge = draw_gauge(
+            Re,
+            5e6,
+            "Flat Plate"
+        )
 
-    ax.set_xlabel("Normalized Velocity")
-    ax.set_ylabel("Pipe Radius")
-    ax.set_title("Pipe Velocity Profile")
+    st.pyplot(fig_gauge)
 
-    st.pyplot(fig)
+# =========================
+# Right Side
+# =========================
+with right_col:
 
-    st.subheader("Flow Visualization")
+    if flow_type == "Pipe Flow":
 
-    fig2, ax2 = plt.subplots(figsize=(8, 2))
+        st.subheader("Velocity Profile")
 
-    ax2.set_xlim(0, 10)
-    ax2.set_ylim(-1, 1)
-
-    for yline in np.linspace(-0.9, 0.9, 12):
-
-        x = np.linspace(0, 10, 400)
+        y = np.linspace(-1, 1, 200)
 
         if Re < 2300:
-            yy = np.ones_like(x) * yline
+            u = 1 - y**2
+
         elif Re < 4000:
-            yy = yline + 0.03 * np.sin(4 * x)
+            u = np.maximum(
+                0,
+                1 - y**2
+            )**0.5
+
         else:
-            yy = yline + 0.08 * np.sin(10 * x)
+            u = np.maximum(
+                0,
+                1 - np.abs(y)
+            )**0.15
 
-        ax2.plot(x, yy)
+        fig, ax = plt.subplots(
+            figsize=(4, 3)
+        )
 
-    ax2.set_title("Qualitative Flow Pattern")
-    ax2.axis("off")
+        ax.plot(u, y)
 
-    st.pyplot(fig2)
+        ax.set_xlabel(
+            "Normalized Velocity"
+        )
 
-else:
+        ax.set_ylabel(
+            "Pipe Radius"
+        )
 
-    st.subheader("Boundary Layer Development")
+        ax.set_title(
+            "Pipe Velocity Profile"
+        )
 
-    x = np.linspace(0.01, 5, 500)
+        st.pyplot(fig)
 
-    delta = 5 * np.sqrt(
-        viscosity * x / (density * velocity)
-    )
+        st.subheader(
+            "Flow Visualization"
+        )
 
-    fig, ax = plt.subplots()
+        fig2, ax2 = plt.subplots(
+            figsize=(5, 1.5)
+        )
 
-    ax.plot(x, delta)
+        ax2.set_xlim(0, 10)
+        ax2.set_ylim(-1, 1)
 
-    ax.fill_between(x, 0, delta, alpha=0.3)
+        for yline in np.linspace(
+            -0.9,
+            0.9,
+            12
+        ):
 
-    ax.set_xlabel("Distance Along Plate (m)")
-    ax.set_ylabel("Boundary Layer Thickness")
-    ax.set_title("Boundary Layer Growth")
+            x = np.linspace(
+                0,
+                10,
+                400
+            )
 
-    st.pyplot(fig)
+            if Re < 2300:
 
-    transition_re = 5e5
+                yy = (
+                    np.ones_like(x)
+                    * yline
+                )
 
-    transition_x = (
-        transition_re * viscosity
-    ) / (density * velocity)
+            elif Re < 4000:
 
-    st.subheader("Transition Location")
+                yy = (
+                    yline
+                    + 0.03*np.sin(4*x)
+                )
 
-    st.write(
-        f"Estimated transition begins near x = {transition_x:.3f} m"
-    )
+            else:
 
-    fig2, ax2 = plt.subplots(figsize=(8, 2))
+                yy = (
+                    yline
+                    + 0.08*np.sin(10*x)
+                )
 
-    ax2.set_xlim(0, 5)
-    ax2.set_ylim(0, 1)
+            ax2.plot(x, yy)
 
-    ax2.plot([0, 5], [0.2, 0.2], linewidth=4)
+        ax2.set_title(
+            "Qualitative Flow Pattern"
+        )
 
-    ax2.axvline(
-        transition_x,
-        linestyle="--"
-    )
+        ax2.axis("off")
 
-    ax2.text(
-        transition_x,
-        0.6,
-        "Transition"
-    )
+        st.pyplot(fig2)
 
-    ax2.set_title(
-        "Laminar → Transitional → Turbulent"
-    )
+    else:
 
-    ax2.axis("off")
+        st.subheader(
+            "Boundary Layer Development"
+        )
 
-    st.pyplot(fig2)
+        x = np.linspace(
+            0.01,
+            5,
+            500
+        )
+
+        delta = 5 * np.sqrt(
+            viscosity * x /
+            (density * velocity)
+        )
+
+        fig, ax = plt.subplots(
+            figsize=(4, 3)
+        )
+
+        ax.plot(x, delta)
+
+        ax.fill_between(
+            x,
+            0,
+            delta,
+            alpha=0.3
+        )
+
+        ax.set_xlabel(
+            "Distance Along Plate (m)"
+        )
+
+        ax.set_ylabel(
+            "Boundary Layer Thickness"
+        )
+
+        ax.set_title(
+            "Boundary Layer Growth"
+        )
+
+        st.pyplot(fig)
+
+        transition_re = 5e5
+
+        transition_x = (
+            transition_re * viscosity
+        ) / (
+            density * velocity
+        )
+
+        st.subheader(
+            "Laminar-Turbulent Transition"
+        )
+
+        st.write(
+            f"Estimated transition occurs near x = {transition_x:.3f} m"
+        )
+
+        fig2, ax2 = plt.subplots(
+            figsize=(5, 1.5)
+        )
+
+        ax2.set_xlim(0, 5)
+        ax2.set_ylim(0, 1)
+
+        ax2.plot(
+            [0, 5],
+            [0.2, 0.2],
+            linewidth=4
+        )
+
+        ax2.axvline(
+            transition_x,
+            linestyle="--"
+        )
+
+        ax2.text(
+            transition_x,
+            0.6,
+            "Transition"
+        )
+
+        ax2.set_title(
+            "Laminar → Turbulent"
+        )
+
+        ax2.axis("off")
+
+        st.pyplot(fig2)
