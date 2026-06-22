@@ -123,7 +123,7 @@ def draw_gauge(value, max_value, flow_type):
             0.22,
             "Laminar",
             fontsize=8,
-            fontweight="bold"
+            fontweight="bold",
             ha="center"
         )
 
@@ -132,7 +132,7 @@ def draw_gauge(value, max_value, flow_type):
             0.22,
             "Turbulent",
             fontsize=8,
-            fontweight="bold"
+            fontweight="bold",
             ha="center"
         )
 
