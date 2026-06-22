@@ -10,26 +10,40 @@ st.set_page_config(page_title="Fluid Flow Visualizer", layout="wide")
 # =========================
 def draw_gauge(value, max_value, flow_type):
 
-    # Standardized colors
-    LAMINAR_COLOR = "#2ca02c"      # green
-    TRANSITION_COLOR = "#ff7f0e"   # orange
-    TURBULENT_COLOR = "#d62728"    # red
+    LAMINAR_COLOR = "#2ca02c"
+    TRANSITION_COLOR = "#ff7f0e"
+    TURBULENT_COLOR = "#d62728"
 
-    fig, ax = plt.subplots(figsize=(4, 2.5))
+    fig, ax = plt.subplots(figsize=(4.5, 3))
 
-    # =====================
-    # PIPE FLOW GAUGE
-    # =====================
+    # =============================
+    # BLACK LOWER PANEL
+    # =============================
+    ax.add_patch(
+        Wedge(
+            (0, 0),
+            1.15,
+            180,
+            360,
+            color="black"
+        )
+    )
+
+    # =============================
+    # PIPE FLOW
+    # =============================
     if flow_type == "Pipe Flow":
 
+        laminar_boundary = 180 * (2300 / 8000)
+        transition_boundary = 180 * (4000 / 8000)
+
         ax.add_patch(
             Wedge(
                 (0, 0),
                 1,
+                180 - laminar_boundary,
                 180,
-                128,
-                color=LAMINAR_COLOR,
-                alpha=0.8
+                color=LAMINAR_COLOR
             )
         )
 
@@ -37,10 +51,9 @@ def draw_gauge(value, max_value, flow_type):
             Wedge(
                 (0, 0),
                 1,
-                128,
-                90,
-                color=TRANSITION_COLOR,
-                alpha=0.8
+                180 - transition_boundary,
+                180 - laminar_boundary,
+                color=TRANSITION_COLOR
             )
         )
 
@@ -48,16 +61,15 @@ def draw_gauge(value, max_value, flow_type):
             Wedge(
                 (0, 0),
                 1,
-                90,
                 0,
-                color=TURBULENT_COLOR,
-                alpha=0.8
+                180 - transition_boundary,
+                color=TURBULENT_COLOR
             )
         )
 
         ax.text(
             -0.85,
-            0.10,
+            0.18,
             "Laminar",
             fontsize=8,
             fontweight="bold"
@@ -72,29 +84,27 @@ def draw_gauge(value, max_value, flow_type):
         )
 
         ax.text(
-            0.60,
-            0.10,
+            0.55,
+            0.18,
             "Turbulent",
             fontsize=8,
             fontweight="bold"
         )
 
-    # =====================
-    # FLAT PLATE GAUGE
-    # =====================
+    # =============================
+    # FLAT PLATE
+    # =============================
     else:
 
-        laminar_fraction = 5e5 / max_value
-        laminar_angle = 180 * laminar_fraction
+        laminar_boundary = 180 * (5e5 / 5e6)
 
         ax.add_patch(
             Wedge(
                 (0, 0),
                 1,
+                180 - laminar_boundary,
                 180,
-                180 - laminar_angle,
-                color=LAMINAR_COLOR,
-                alpha=0.8
+                color=LAMINAR_COLOR
             )
         )
 
@@ -102,76 +112,70 @@ def draw_gauge(value, max_value, flow_type):
             Wedge(
                 (0, 0),
                 1,
-                180 - laminar_angle,
                 0,
-                color=TURBULENT_COLOR,
-                alpha=0.8
+                180 - laminar_boundary,
+                color=TURBULENT_COLOR
             )
         )
 
         ax.text(
             -0.85,
-            0.10,
+            0.18,
             "Laminar",
             fontsize=8,
             fontweight="bold"
         )
 
         ax.text(
-            0.60,
-            0.10,
+            0.55,
+            0.18,
             "Turbulent",
             fontsize=8,
             fontweight="bold"
         )
 
-    # =====================
+    # =============================
     # NEEDLE
-    # =====================
+    # =============================
     fraction = min(value, max_value) / max_value
 
     angle = np.pi * (1 - fraction)
 
     ax.plot(
-        [0, 0.85 * np.cos(angle)],
-        [0, 0.85 * np.sin(angle)],
-        linewidth=4,
-        color="black"
+        [0, 0.85*np.cos(angle)],
+        [0, 0.85*np.sin(angle)],
+        color="white",
+        linewidth=4
     )
 
     ax.plot(
         0,
         0,
         marker="o",
-        markersize=8,
-        color="black"
+        markersize=10,
+        color="white"
     )
 
-    # =====================
-    # REYNOLDS NUMBER BOX
-    # =====================
+    # =============================
+    # REYNOLDS NUMBER DISPLAY
+    # =============================
     ax.text(
         0,
-        -0.25,
+        -0.45,
         f"Re = {value:,.0f}",
-        ha="center",
-        va="center",
-        fontsize=11,
-        fontweight="bold",
         color="white",
-        bbox=dict(
-            facecolor="black",
-            edgecolor="black",
-            boxstyle="round,pad=0.4"
-        )
+        fontsize=12,
+        fontweight="bold",
+        ha="center"
     )
 
     ax.set_xlim(-1.2, 1.2)
-    ax.set_ylim(-0.45, 1.2)
+    ax.set_ylim(-0.6, 1.2)
 
     ax.axis("off")
 
     return fig
+
 
 # =========================
 # Title
