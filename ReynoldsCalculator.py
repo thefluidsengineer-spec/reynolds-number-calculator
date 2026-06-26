@@ -466,9 +466,9 @@ st.markdown(
 )
 
 st.markdown('<div class="tfe-kicker">The Fluids Engineer</div>', unsafe_allow_html=True)
-st.title("Reynolds Number Calculator & Flow Visualizer")
+st.title("Reynolds Number Calculator & Flow Visualizer (Turn on Light Mode)")
 st.markdown(
-    '<div class="tfe-subtitle">TURN ON LIGHT MODE Estimate whether a pipe flow or flat-plate boundary layer is laminar, transitional, or turbulent—and see what the result means physically.</div>',
+    '<div class="tfe-subtitle">Estimate whether a pipe flow or flat-plate boundary layer is laminar, transitional, or turbulent—and see what the result means physically.</div>',
     unsafe_allow_html=True,
 )
 
