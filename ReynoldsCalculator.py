@@ -24,7 +24,8 @@ from matplotlib.patches import Circle, Wedge
 # Site configuration — add these URLs when they are ready.
 # -----------------------------------------------------------------------------
 YOUTUBE_VIDEO_URL = ""  # Example: "https://www.youtube.com/watch?v=..."
-
+NEWSLETTER_URL    = ""  # Example: "https://www.youtube.com/watch?v=..."
+ 
 # -----------------------------------------------------------------------------
 # Constants and reference values
 # -----------------------------------------------------------------------------
