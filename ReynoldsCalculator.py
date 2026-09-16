@@ -20,13 +20,10 @@ import numpy as np
 import streamlit as st
 from matplotlib.patches import Circle, Wedge
 
-
 # -----------------------------------------------------------------------------
 # Site configuration — add these URLs when they are ready.
 # -----------------------------------------------------------------------------
 YOUTUBE_VIDEO_URL = ""  # Example: "https://www.youtube.com/watch?v=..."
-NEWSLETTER_URL = ""  # Example: "https://your-domain.com/newsletter"
-
 
 # -----------------------------------------------------------------------------
 # Constants and reference values
@@ -49,13 +46,11 @@ LBM_FT3_TO_KG_M3 = 16.01846337396
 LBM_FT_S_TO_PA_S = 1.48816394357
 CST_TO_M2_S = 1.0e-6
 
-
 @dataclass(frozen=True)
 class FluidPreset:
     density_kg_m3: float
     dynamic_viscosity_pa_s: float
     note: str
-
 
 FLUID_PRESETS = {
     "Water at 20 °C (approx.)": FluidPreset(
@@ -69,7 +64,6 @@ FLUID_PRESETS = {
         note="Approximate dry-air properties near 20 °C and 1 atm.",
     ),
 }
-
 
 # -----------------------------------------------------------------------------
 # Pure calculation helpers
@@ -466,7 +460,7 @@ st.markdown(
 )
 
 st.markdown('<div class="tfe-kicker">The Fluids Engineer</div>', unsafe_allow_html=True)
-st.title("Reynolds Number Calculator & Flow Visualizer (Turn on Light Mode)")
+st.title("Reynolds Number Calculator")
 st.markdown(
     '<div class="tfe-subtitle">Estimate whether a pipe flow or flat-plate boundary layer is laminar, transitional, or turbulent—and see what the result means physically.</div>',
     unsafe_allow_html=True,
